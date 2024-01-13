@@ -338,14 +338,14 @@ func (c *Code) adjacentPenalty() int {
 		for x := 1; x < c.Size; x++ {
 			b := c.Black(x, y)
 			if b != last {
-				if n := x - bs; n >= 5 {
+				if n := x - bs; n > 5 {
 					p += n1 + (n - 5)
 				}
 				bs = x
 			}
 			last = b
 		}
-		if n := c.Size - bs; n >= 5 {
+		if n := c.Size - bs; n > 5 {
 			p += n1 + (n - 5)
 		}
 	}
@@ -355,14 +355,14 @@ func (c *Code) adjacentPenalty() int {
 		for y := 1; y < c.Size; y++ {
 			b := c.Black(x, y)
 			if b != last {
-				if n := y - bs; n >= 5 {
+				if n := y - bs; n > 5 {
 					p += n1 + (n - 5)
 				}
 				bs = y
 			}
 			last = b
 		}
-		if n := c.Size - bs; n >= 5 {
+		if n := c.Size - bs; n > 5 {
 			p += n1 + (n - 5)
 		}
 	}
@@ -388,31 +388,34 @@ func (c *Code) blockPenalty() int {
 }
 
 // patternPenalty penalizes the 1:1:3:1:1 ratio
-// (dark:light:dark:light:dark) pattern in row/column.
+// (dark:light:dark:light:dark) pattern in row/column, followed
+// or preceded by at least 4 light modules.
 func (c *Code) patternPenalty() int {
 	const n3 = 40
-	pattern := []bool{true, false, true, true, true, false, true}
-	var n int
-	for y := 0; y < c.Size; y++ {
-	row:
-		for x := 0; x <= c.Size-7; x++ {
-			for i, d := range pattern {
-				if c.Black(x+i, y) != d {
-					continue row
-				}
-			}
+	var n, window int
+	module := func(x, y int) {
+		window <<= 1
+		if c.Black(x, y) {
+			window |= 1
+		}
+		const mask = 1<<11 - 1
+		switch window & mask {
+		case 0b0000_1011101, 0b1011101_0000:
 			n++
+			// Don't count matches more than once.
+			window = mask
+		}
+	}
+	for y := 0; y < c.Size; y++ {
+		window = 0
+		for x := 0; x < c.Size+4; x++ {
+			module(x, y)
 		}
 	}
 	for x := 0; x < c.Size; x++ {
-	col:
-		for y := 0; y <= c.Size-7; y++ {
-			for i, d := range pattern {
-				if c.Black(x, y+i) != d {
-					continue col
-				}
-			}
-			n++
+		window = 0
+		for y := 0; y < c.Size+4; y++ {
+			module(x, y)
 		}
 	}
 	return n * n3

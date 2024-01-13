@@ -60,7 +60,7 @@ func Encode(text string, level Level) (*Code, error) {
 	// Pick appropriate mask.
 	var best *coding.Code
 	lowPenalty := int(^uint(0) >> 1)
-	for m := coding.Mask(0); m < 7; m++ {
+	for m := coding.Mask(0); m <= 7; m++ {
 		// Build and execute plan.
 		p, err := coding.NewPlan(v, l, m)
 		if err != nil {

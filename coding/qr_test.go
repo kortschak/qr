@@ -138,7 +138,7 @@ func TestEncode(t *testing.T) {
 
 func TestPenalty(t *testing.T) {
 	grid := &Code{
-		// runs of 5, 6, 8, 6 -> 17
+		// runs of 6, 8, 6    -> 14
 		// 11 2x2 blocks      -> 33
 		// 2 penalty patterns -> 80
 		// 61% black          -> 20
@@ -156,7 +156,7 @@ func TestPenalty(t *testing.T) {
 		Stride: 1,
 	}
 	const (
-		adjacentPenalty   = 17
+		adjacentPenalty   = 14
 		blockPenalty      = 33
 		patternPenalty    = 80
 		proportionPenalty = 20
